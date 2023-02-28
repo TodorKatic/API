@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class CharacterController: ControllerBase
@@ -18,9 +20,11 @@ namespace API.Controllers
         {
             _characterService = characterService;
         }
+        
         [HttpGet("GetAll")]
         public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> Get()
         {
+            int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)!.Value);
             return Ok(await _characterService.GetAllCharacters());
         }
         [HttpGet("{id}")]
@@ -50,6 +54,11 @@ namespace API.Controllers
             if(response.Data is null)
                 return NotFound(response);
             return Ok(response);
+        }
+        [HttpPost("Skill")]
+        public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> AddCharacterSkill(AddCharacterSkillDto newCharacterSkill)
+        {
+            return Ok(await _characterService.AddCharacterSkill(newCharacterSkill));
         }
     }
 }
